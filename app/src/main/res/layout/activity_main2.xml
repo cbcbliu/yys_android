@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C5BDBD"
+    android:columnCount="3"
+    android:rowCount="2"
+
+    >
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_columnSpan="3"
+        android:background="#CC2626"
+        android:gravity="center"
+        android:text="运行日志"
+        android:textColor="#000000"
+        android:textSize="30dp" />
+
+
+    <ScrollView
+        android:id="@+id/scr"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:layout_columnSpan="3">
+
+            <TextView
+                android:id="@+id/tv1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:textSize="18dp" />
+
+
+
+    </ScrollView>
+
+
+    <Button
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="返回" />
+
+    <Button
+        android:id="@+id/clear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="清除" />
+
+    <Button
+        android:id="@+id/flush"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="刷新" />
+
+
+</GridLayout>
