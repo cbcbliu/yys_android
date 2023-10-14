@@ -1,0 +1,18 @@
+# C/C++ build system timings
+create_cxx_tasks
+  create-initial-cxx-model
+    create-module-model 14ms
+    [gap of 14ms]
+    create-variant-model 17ms
+    [gap of 10ms]
+    create-ARM64_V8A-model 10ms
+    create-X86-model 11ms
+    create-module-model 11ms
+    create-variant-model 20ms
+    create-ARMEABI_V7A-model 22ms
+    create-ARM64_V8A-model 20ms
+    create-X86-model 11ms
+    create-X86_64-model 28ms
+  create-initial-cxx-model completed in 203ms
+create_cxx_tasks completed in 209ms
+
