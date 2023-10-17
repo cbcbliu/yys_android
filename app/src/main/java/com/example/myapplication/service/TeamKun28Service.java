@@ -6,7 +6,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.example.myapplication.dao.MatchResult;
-import com.example.myapplication.utils.FuncUtils;
 import com.example.myapplication.utils.ImgUtils;
 
 

@@ -16,4 +16,6 @@ public class FunctionConstant {
 
     public static final String HUNTU = "魂土";
 
+    public static final String LIAOTU = "寮突速刷";
+
 }

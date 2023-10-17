@@ -103,7 +103,7 @@ public class MyService extends Service {
                     case FunctionConstant.TANSUO_JJTP:{
                         logToScreen("启动脚本，结界突破-困28循环");
                         LogUtils.saveLog(this,"启动脚本，结界突破-困28循环");
-                        executor.jjtp();
+                        executor.tansuo();
                     }break;
                     case  FunctionConstant.BAIGUI:{
                         logToScreen("启动脚本，百鬼夜行");
@@ -117,6 +117,10 @@ public class MyService extends Service {
                         logToScreen("启动脚本，魂土");
                         executor.hunTu();
                     }break;
+                    case FunctionConstant.LIAOTU:{
+                        logToScreen("启动脚本，"+FunctionConstant.LIAOTU);
+                        executor.liaoTu();
+                    }
                     default:{
                         logToScreen("该功能尚在开发！");
                     }

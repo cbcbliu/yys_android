@@ -31,8 +31,8 @@ public class FunctionExecutor {
 
     public void  init(Service service,int[] flag,Bundle config,Intent intent){
         this.tpjnum =  config.getInt("tpjnum",0);
-        this.victorynum = config.getInt("victorynum",0);
-        this.failnum = config.getInt("failnum",0);
+        this.victorynum = config.getInt("victorynum",0);//结界突破胜利次数
+        this.failnum = config.getInt("failnum",0);//结界失败胜利次数
         this.service = service;
         this.startFlag = flag;
         this.config = config;
@@ -97,6 +97,7 @@ public class FunctionExecutor {
 
         while (startFlag[0] == 1){
             Thread.sleep(1000);
+            logToScreen("已挑战业原火"+time+"次,突破卷数量:"+tpjnum);
             ImgUtils.getScreen();
             MatchResult tz = ImgUtils.findImg(IconStrConstant.YEYUANHUO_TZ);//挑战
             MatchResult victory = ImgUtils.findImg(IconStrConstant.SCENE_VICTORY);//挑战
@@ -119,15 +120,15 @@ public class FunctionExecutor {
                 if(tpj.isExist()){
                     tpjnum++;
                     logToScreen("掉落突破卷");
-                    if(tpjnum>=10){
+                    if(tpjnum>=20){
                         Thread.sleep(500);
                         logToScreen("突破卷足够,前往突破");
-                        jjtp();
+                        //jjtp();
+                        break;
                     }
                 }
                 victory.tap();
             }
-            logToScreen("已挑战业原火"+time+"次,突破卷数量:"+tpjnum);
         }
     }
 
@@ -158,7 +159,29 @@ public class FunctionExecutor {
         }
     }
 
+    /**
+     * 寮突速刷
+     * @throws InterruptedException
+     */
+    public void liaoTu() throws InterruptedException{
+        //583,Y:198
+        while (startFlag[0] == 1){
+
+            Thread.sleep(1000);
+
+            ImgUtils.tap(583,198);//第一个结界的位置
+            Thread.sleep(800);
+            ImgUtils.getScreen();
+            MatchResult jing = ImgUtils.findImg("jing");//进攻按钮
+            if(jing.isExist()){
+                jing.tap();
+            }
+        }
+
+    }
+
     private void logToScreen(String str){
+        Log.d(Tag,str);
         intent.putExtra("state", str);
         service.sendBroadcast(intent);
     }
@@ -167,116 +190,159 @@ public class FunctionExecutor {
     //困28探索
     public void tansuo() throws InterruptedException {
 
-        int tpjnum =  config.getInt("tpjnum");
         int exceptionTime = 0;//异常次数
         String function = config.getString("function");
         boolean flag = false;//结束标识
+        MatchResult baox2,exit,zlp,shengli,kun28,tansuo,boss,normal,reject,tsExit,tpj,yb;
+        boolean isLoop = function.equals(FunctionConstant.TANSUO_JJTP);
         while (startFlag[0] == 1){
 
             Thread.sleep(1000);
-            logToScreen("探索中...突破卷:"+tpjnum + ",探索次数:"+time + ",突破次数:"+jjtpTime);
-            LogUtils.saveLog(service,"探索中...突破卷:"+tpjnum + ",探索次数:"+time+ ",突破次数:"+jjtpTime);
-            ImgUtils.getScreen();
+            logToScreen("探索困28中...突破卷:"+tpjnum + ",探索次数:"+time + (isLoop? (",突破次数:"+jjtpTime) : ""));
+            //LogUtils.saveLog(service,"探索中...突破卷:"+tpjnum + ",探索次数:"+time+ ",突破次数:"+jjtpTime);
 
-            MatchResult reject = ImgUtils.findImg("reject");//悬赏拒绝
-            if (reject.getSimilarity() > 0.9) {
-                ImgUtils.tap(reject.getX(), reject.getY());
+            //----------------【异常区】--------------------
+            reject = ImgUtils.findImg("reject");//悬赏拒绝
+            shengli = ImgUtils.findImg("shengli");//开宝箱之后
+            if (reject.isExist()) {
+                reject.tap();
             }
-
+            if (shengli.isExist()) {
+                shengli.tap();
+            }
             if(exceptionTime >= 10){//累计十次退出探索重进避免死循环
-                MatchResult exit = ImgUtils.findImg("tansuo/exit");
-                if(exit.getSimilarity()>0.95){
-                    ImgUtils.tap(exit.getX(),exit.getY(),"tansuo/exit");
+                tsExit = ImgUtils.findImg("tansuo/exit");
+                if(tsExit.isExist()){
+                    tsExit.tap("tansuo/exit");
                     Thread.sleep(800);
-                    ImgUtils.getScreen();
-                }
-                MatchResult exitconfirm = ImgUtils.findImg("tansuo/exitconfirm");
-                if(exitconfirm.getSimilarity()>0.95){
-                    ImgUtils.tap(exitconfirm.getX(),exitconfirm.getY(),"tansuo/exitconfirm");
+                    ImgUtils.tap(775,403);//确认退出
                     exceptionTime = 0;
                 }
-                //continue;
             }
+            //----------------【异常区】--------------------
 
-            //MatchResult baox = ImgUtils.findImg("tansuo/baox");//暗图标宝箱
-            MatchResult baox2 = ImgUtils.findImg("tansuo/baox2");//图标宝箱
-            MatchResult exit = ImgUtils.findImg("jjexit");//红叉按钮通用
+            ImgUtils.getScreen();
+            boss = ImgUtils.findImg("boss");
+            normal = ImgUtils.findImg("normal");
 
-            MatchResult boss = ImgUtils.findImg("boss");
-            if(boss.getSimilarity()>0.9){
-                ImgUtils.tap(boss.getX(),boss.getY(),"boss");
+            if(boss.isExist() || normal.isExist()){
+               if(boss.isExist()){
+                   boss.tap("boss");
+               }else{
+                   normal.tap("normal");
+               }
+
+               //进入战斗循环，需防止没点到怪物，异常进入循环
+                while (startFlag[0] == 1){
+                    Thread.sleep(1000);
+                    logToScreen("困28战斗中...突破卷:"+tpjnum + ",探索次数:"+time + (isLoop? (",突破次数:"+jjtpTime) : ""));
+
+                    ImgUtils.getScreen();
+                    shengli = ImgUtils.findImg("shengli");
+                    reject = ImgUtils.findImg("reject");//悬赏拒绝
+                    yb = ImgUtils.findImg("tansuo/exit");//樱饼图标，判断是否在战斗界面
+                    if (reject.isExist()) {
+                        reject.tap();//悬赏拒绝
+                    }
+                    if(yb.isExist()){
+                        break;//异常
+                    }
+
+                    if(shengli.isExist()){
+                        Thread.sleep(500);//结算界面战利品弹出来需要时间
+                        ImgUtils.getScreen();
+                        tpj = ImgUtils.findImg("tpj");
+                        if(tpj.isExist()){
+                            tpjnum++;
+                            if(tpjnum >= 10 && !function.equals(FunctionConstant.TANSUO)){
+                                //当脚本功能为探索突破循环时，需要退出
+                                logToScreen( "突破卷数量已足够，准备结束探索" );
+                                flag = true;
+                            }
+                        }
+                        shengli.tap("shengli");
+                        time++;//困28次数加1
+                        break;
+                    }else{
+                        ImgUtils.tap(730,550);//点击空白处
+                    }
+
+                }
                 exceptionTime = 0;
                 continue;
-            }
-            MatchResult normal = ImgUtils.findImg("normal");
-            if(normal.getSimilarity()>0.9){
-                ImgUtils.tap(normal.getX(),normal.getY(),"normal");
-                exceptionTime = 0;
-                continue;
-            }
-            MatchResult zlp = ImgUtils.findImg("zlp");
-            MatchResult shengli = ImgUtils.findImg("shengli");
-            MatchResult kun28 = ImgUtils.findImg("kun28");
-            MatchResult tansuo = ImgUtils.findImg("tansuo");
 
-            if(zlp.getSimilarity()>0.98){
-                ImgUtils.tap(zlp.getX(),zlp.getY(),"zlp");
+            }
+            zlp = ImgUtils.findImg("zlp");
+            //shengli = ImgUtils.findImg("shengli");
+            kun28 = ImgUtils.findImg("kun28");
+            tansuo = ImgUtils.findImg("tansuo");
+
+//            if(shengli.isExist()){
+//                Thread.sleep(500);//结算界面战利品弹出来需要时间
+//                ImgUtils.getScreen();
+//                tpj = ImgUtils.findImg("tpj");
+//                if(tpj.isExist()){
+//                    tpjnum++;
+//                    if(tpjnum >= 10 && !function.equals(FunctionConstant.TANSUO)){
+//                        //当脚本功能为探索突破循环时，需要退出
+//                        logToScreen( "突破卷数量已足够，准备结束探索" );
+//                        flag = true;
+//                    }
+//                }
+//                shengli.tap("shengli");
+//                exceptionTime = 0;
+//                time++;
+//                continue;
+//            }
+
+            if(zlp.getSimilarity()>0.98){//打完boss的战利品
+                zlp.tap("zlp");
                 Thread.sleep(800);
                 ImgUtils.tap(730,550);//避免卡住循环
                 exceptionTime = 0;
                 continue;
             }
-            if(shengli.getSimilarity()>0.9){
-                Thread.sleep(500);//结算界面战利品弹出来需要时间
-                ImgUtils.getScreen();
-                MatchResult tpj = ImgUtils.findImg("tpj");
-                if(tpj.getSimilarity()>0.9){
-                    tpjnum++;
-                    if(tpjnum >= 10 && !function.equals(FunctionConstant.TANSUO)){
-                        //当脚本功能为探索突破循环时，需要退出
-                        Log.d(Tag, "突破卷数量已足够，准备结束探索" );
-                        flag = true;
-                    }
-                }
-                ImgUtils.tap(shengli.getX(),shengli.getY(),"shengli");
-                exceptionTime = 0;
-                time++;
-                continue;
-            }
-            if(kun28.getSimilarity()>0.9){
-                if(baox2.getSimilarity()>0.9){ //点击宝箱
-                    ImgUtils.tap(baox2.getX(),baox2.getY(),"baoxiang");
+
+            //----------------【困28入口】--------------------
+            if(kun28.isExist()){//困28入口1
+                baox2 = ImgUtils.findImg("tansuo/baox2");//图标宝箱
+                if(baox2.isExist()){ //点击宝箱
+                    baox2.tap("baoxiang");
                     continue;
                 }
                 if(flag){
-                    Log.d(Tag, "探索结束" );
-                    break;
+                    logToScreen("探索结束" );
+                    jjtp();
                 }
-                ImgUtils.tap(kun28.getX(),kun28.getY(),"kun28");
+                kun28.tap("kun28");
                 exceptionTime = 0;
                 continue;
             }
-            if(tansuo.getSimilarity()>0.9){
-                if(baox2.getSimilarity()>0.9 && exit.getSimilarity()>0.9){ //点击宝箱
-                    ImgUtils.tap(exit.getX(), exit.getY(), "exit");
+            if(tansuo.isExist()){//困28入口2
+                baox2 = ImgUtils.findImg("tansuo/baox2");//图标宝箱
+                exit = ImgUtils.findImg("jjexit");//红叉退出按钮通用
+                if(baox2.isExist() && exit.isExist()){ //点击宝箱
+                    exit.tap( "exit");//退出入口，先点击宝箱
                     Thread.sleep(800);
-                    ImgUtils.tap(baox2.getX(),baox2.getY(),"baoxiang");
+                    baox2.tap("baoxiang");
                     continue;
                 }
                 if(flag){
-                    if(exit.getSimilarity()>0.9){
-                        ImgUtils.tap(exit.getX(),exit.getY(),"exit");
-                        Log.d(Tag, "探索结束" );
-                        break;
+                    if(exit.isExist()){
+                        exit.tap("exit");
+                        logToScreen("探索结束" );
+                        jjtp();
                     }
                 }
-                ImgUtils.tap(tansuo.getX(),tansuo.getY(),"tansuo");
+                tansuo.tap("tansuo");
                 exceptionTime = 0;
                 continue;
             }
+            //----------------【困28入口】--------------------
+
             exceptionTime++;//一次循环什么也没点,累计十次则退出探索重进避免死循环
             ImgUtils.tap(730,550);//探索点击空白处
-            Log.d(Tag, "点击空白处,累计"+ exceptionTime + "次" );
+            logToScreen("点击空白处,累计"+ exceptionTime + "次"  );
         }
 
     }
@@ -322,49 +388,35 @@ public class FunctionExecutor {
             MatchResult reject = ImgUtils.findImg("reject");//悬赏拒绝
 
             //可能干扰的存在，悬赏之类
-            if (reject.getSimilarity() > 0.9) {
-                ImgUtils.tap(reject.getX(), reject.getY());
+            if (reject.isExist()) {
+                reject.tap();
             }
-            if (shengli.getSimilarity() > 0.9) {
-                ImgUtils.tap(shengli.getX(), shengli.getY());
+            if (shengli.isExist()) {
+                shengli.tap();
             }
 
-            if(tpj0.getSimilarity() > 0.99){//突破卷为0，前往探索
+            if(tpj0.getSimilarity() > 0.99){//突破卷为0
                 tpjnum = 0;
-                if(jjexit.getSimilarity()>0.9){
-                    Log.d(Tag, "突破卷为0");
-                    logToScreen("突破卷为0");
-                    ImgUtils.tap(jjexit.getX(), jjexit.getY());
+                if(jjexit.isExist()){
+                    jjexit.tap();
                 }
-                if(!function.equals(FunctionConstant.JJTP)){//探索突破循环
-                    Thread.sleep(500);
-                    Log.d(Tag, "结束突破...");
-                    logToScreen("突破卷不足，结束突破");
-                    jump();
-                }
-                continue;
+                logToScreen("突破卷为0,结束突破");
+                break;
             }
 
-            if(tpjnum < 10){//突破卷不够，前往探索
-                if(jjexit.getSimilarity()>0.9){
-                    Log.d(Tag, "突破卷不足");
-                    logToScreen("突破卷不足");
-                    ImgUtils.tap(jjexit.getX(), jjexit.getY());
+            if(tpjnum < 10){//突破卷不够
+                if(jjexit.isExist()){
+                    jjexit.tap();
                 }
-                if(!function.equals(FunctionConstant.JJTP)){//探索突破循环
-                    Thread.sleep(500);
-                    Log.d(Tag, "结束突破...");
-                    logToScreen("突破卷不足，结束突破");
-                    jump();
-                }
-                continue;
+                logToScreen("突破卷不足");
+                break;
             }else{//突破卷足够，前往突破
-                if(jjtp.getSimilarity()>0.9){
-                    ImgUtils.tap(jjtp.getX(), jjtp.getY());
+                if(jjtp.isExist()){
+                    jjtp.tap();
                 }
             }
 
-            while ((victorynum + failnum) < 9) { //此循环位于结界突破界面,包含了结界突破战斗界面
+            while ((victorynum + failnum) < 9) { //此循环位于结界突破界面,包含了结界突破战斗循环
 
                 if (startFlag[0] == 0) {
                     break;//服务停止时，线程也需要及时结束
@@ -379,33 +431,37 @@ public class FunctionExecutor {
                 //jjexit = ImgUtils.findImg("jjexit");
                 MatchResult jjpanel = ImgUtils.findImg("jjpanel");//判断是否在结界突破界面
                 reject = ImgUtils.findImg("reject");//悬赏拒绝
-                if (reject.getSimilarity() > 0.9) {
-                    ImgUtils.tap(reject.getX(), reject.getY());
+                if (reject.isExist()) {
+                    reject.tap();
                 }
                 //突破卷为0
                 if(tpj0.getSimilarity() > 0.99){
+                    tpjnum = 0;
+                    if(jjexit.isExist()){
+                        jjexit.tap();
+                    }
                     break;
                 }
 
-                if (shengli.getSimilarity() > 0.9) {
-                    ImgUtils.tap(shengli.getX(), shengli.getY());
+                if (shengli.isExist()) {
+                    shengli.tap();
                 }
 
-                if (jjpanel.getSimilarity() > 0.9) {
+                if (jjpanel.isExist()) {
                     Log.d(Tag, "位于结界突破面板，准备进攻...");
                     ImgUtils.tap(308 + (((victorynum + failnum) % 3) * 332), 208 + ((victorynum + failnum) / 3) * 136);
                     Thread.sleep(800);
                     ImgUtils.getScreen();
                 }else{//进入结界突破
                     jjtp = ImgUtils.findImg("jjtp");
-                    if(jjtp.getSimilarity()>0.9){
-                        ImgUtils.tap(jjtp.getX(), jjtp.getY());
+                    if(jjtp.isExist()){
+                        jjtp.tap();
                     }
                 }
                 MatchResult jing = ImgUtils.findImg("jing");//进攻按钮
                 //进入战斗界面
-                if (jing.getSimilarity() > 0.9) {
-                    ImgUtils.tap(jing.getX(), jing.getY());
+                if (jing.isExist()) {
+                    jing.tap();
                     Log.d(Tag, "进入结界突破战斗！");
                     boolean backDone = false;//退出标志
                     int failcount = 0;//主动退出失败累计
@@ -422,40 +478,42 @@ public class FunctionExecutor {
 
                         //特殊情况
                         reject = ImgUtils.findImg("reject");//悬赏拒绝
-                        if (reject.getSimilarity() > 0.9) {
-                            ImgUtils.tap(reject.getX(), reject.getY());
+                        if (reject.isExist()) {
+                            reject.tap();
                         }
                         jjexit = ImgUtils.findImg("jjexit");//结界突破面板退出按钮,说明不在战斗界面,需终止循环
-                        if(jjexit.getSimilarity() > 0.9){
+                        if(jjexit.isExist()){
                             Log.d(Tag,"界面异常,终止循环！");
                             break;
                         }
 
                         if ((failnum + victorynum) == 8 && !backDone && (failnum + failcount) < exitTime) {
+
                             //最后一个结界 且 未输满三次
-                            if (exit.getSimilarity() > 0.9) {
-                                ImgUtils.tap(exit.getX(), exit.getY());
-                                Thread.sleep(600);
-                                ImgUtils.getScreen();
-                                confirm = ImgUtils.findImg("confirm");//退出确认
-                            }
-                            if (confirm.getSimilarity() > 0.9) {
-                                ImgUtils.tap(confirm.getX(), confirm.getY());
+                            if (exit.isExist()) {
+                                exit.tap();
+                                Thread.sleep(800);//
+                                ImgUtils.tap(742,422);//退出确认
                                 backDone = true;
+                                continue;
+                            }
+                            if(confirm.isExist()){
+                                //异常情况，没点到退出确认
+                                confirm.tap();
                             }
                         }
-                        if (shengli.getSimilarity() > 0.9) {
+                        if (shengli.isExist()) {
                             //胜利
-                            ImgUtils.tap(shengli.getX(), shengli.getY());
+                            shengli.tap();
                             victorynum++;
                             jjtpTime++;//突破胜利次数累计
                             logToScreen("结界突破战斗胜利！");
                             break;
-                        } else if (again.getSimilarity() > 0.9) {
+                        } else if (again.isExist()) {
                             //失败
                             if (failnum + failcount >= exitTime) {
                                 //已经输满三次,不考虑主动退
-                                ImgUtils.tap(again.getX(), again.getY() - 100);
+                                ImgUtils.tap(again.getX(), again.getY() - 100);//点击空白处
                                 failnum++;
                                 logToScreen("结界突破战斗失败！");
                                 break;
@@ -464,11 +522,9 @@ public class FunctionExecutor {
 
                             if ((failnum + victorynum) == 8) {
                                 //最后一个结界,需主动退输满3次
-                                ImgUtils.tap(again.getX(), again.getY());
+                                again.tap();
                                 Thread.sleep(800);
-                                ImgUtils.getScreen();
-                                confirm = ImgUtils.findImg("confirm");//重新挑战确认
-                                ImgUtils.tap(confirm.getX(), confirm.getY());
+                                ImgUtils.tap(757,433);//重新挑战确认
                                 backDone = false;//重置退出标志,继续战斗循环
                                 failcount++;
                                 logToScreen("未输满三次");
@@ -490,16 +546,18 @@ public class FunctionExecutor {
             //打完九个,刷新
             if ((victorynum + failnum) >= 9 && victorynum < 9) {//打完九个且胜利次数小于9,需手动刷新,且考虑时间是否达到5分钟
                 ImgUtils.getScreen();
-                MatchResult flush = ImgUtils.findImg("flush");//进攻按钮flsuhconfirm
+                MatchResult flush = ImgUtils.findImg("flush");//进攻按钮
                 MatchResult flsuhconfirm = ImgUtils.findImg("flsuhconfirm");
-                if (flush.getSimilarity() > 0.9) {
-                    ImgUtils.tap(flush.getX(), flush.getY());
+                if (flush.isExist()) {
+                    flush.tap();
                     Thread.sleep(800);
-                    ImgUtils.getScreen();
-                    flsuhconfirm = ImgUtils.findImg("flsuhconfirm");
+                    ImgUtils.tap(758,429);//确认刷新
+                    victorynum = 0;
+                    failnum=0;
                 }
-                if (flsuhconfirm.getSimilarity() > 0.9) {
-                    ImgUtils.tap(flsuhconfirm.getX(), flsuhconfirm.getY());
+                if (flsuhconfirm.isExist()) {
+                    //异常情况，没点到确认
+                    flsuhconfirm.tap();
                     victorynum = 0;
                     failnum=0;
 
@@ -518,8 +576,8 @@ public class FunctionExecutor {
 
         //特殊情况
         MatchResult jjexit = ImgUtils.findImg("jjexit");//判断是否在结界突破界面
-        if(jjexit.getSimilarity()>0.9){
-            ImgUtils.tap(jjexit.getX(),jjexit.getY());
+        if(jjexit.isExist()){
+            jjexit.tap();
         }
         switch (config.getString("function")){
             case FunctionConstant.TANSUO_JJTP:{

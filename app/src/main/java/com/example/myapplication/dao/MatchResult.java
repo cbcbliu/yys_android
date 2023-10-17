@@ -60,6 +60,10 @@ public class MatchResult {
         ImgUtils.tap(this.x,this.y);
     }
 
+    public void tap(String name){
+        ImgUtils.tap(this.x,this.y,name);
+    }
+
     /**
      * 普遍情况相似度大于0.9视为存在
      */
