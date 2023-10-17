@@ -15,15 +15,22 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.myapplication.constant.FunctionConstant;
+import com.example.myapplication.dao.MatchResult;
 import com.example.myapplication.service.MyService;
 import com.example.myapplication.service.OnProgressListener;
 import com.example.myapplication.service.TestService;
@@ -31,25 +38,37 @@ import com.example.myapplication.utils.ImgUtils;
 import com.example.myapplication.utils.ToastUtils;
 
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
+import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kotlin.reflect.KFunction;
+
 /**
  * 界面1: app主界面
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnClickListener {
 
     private MyService myService;
-    private TextView state;
 
     private Intent intent;
     private MsgReceiver msgReceiver;
     Toast toast = null;
 
-    private static Handler handler = new Handler(Looper.getMainLooper());
+    //全局变量
+    private TextView state;
+    private TextView funcTv;
+    private String function;
+
+    EditText tpjnum,victorynum,failnum,testTxt;
+
+    final int[] spinnerFlag = {0};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,138 +85,123 @@ public class MainActivity extends AppCompatActivity {
             registerReceiver(msgReceiver,intentFilter);
         }
 
-        Map<String,String> dataMap = new HashMap<>();//保存页面数据
         //加载opencv
         if(OpenCVLoader.initDebug()){
             Log.d("OpenCV","加载成功");
         }else{
             Log.d("OpenCV","加载失败");
         }
-
-        //脚本启动状态
+        //脚本运行状态
         state = findViewById(R.id.state);
+        funcTv = findViewById(R.id.funcTv);
         //文本输入框
-        EditText tpjnum = findViewById(R.id.tpjnum);
-        EditText victorynum = findViewById(R.id.victorynum);
-        EditText failnum = findViewById(R.id.failnum);
-        EditText testTxt = findViewById(R.id.testTxt);
+         tpjnum = findViewById(R.id.tpjnum);
+         victorynum = findViewById(R.id.victorynum);
+         failnum = findViewById(R.id.failnum);
+         testTxt = findViewById(R.id.testTxt);
 
         //按钮
-        Button start = findViewById(R.id.start);
-        Button stop = findViewById(R.id.stop);
-        Button test = findViewById(R.id.test);
-        Button jump = findViewById(R.id.jump);
+        findViewById(R.id.start).setOnClickListener(this);
+        findViewById(R.id.stop).setOnClickListener(this);
+        findViewById(R.id.test).setOnClickListener(this);
+        findViewById(R.id.jump).setOnClickListener(this);
 
-        //单选框
-        RadioGroup radioGroup = findViewById(R.id.radioGroup);
-        RadioButton onlyJjtpRadio = findViewById(R.id.radio);
-        RadioButton onlyTansuoRadio = findViewById(R.id.radio2);
-        RadioButton bothRadio = findViewById(R.id.radio3);
-        bothRadio.setChecked(true);//默认选择
+        //下拉框
+        ((Spinner)findViewById(R.id.spinner)).setOnItemSelectedListener(this);
+        ((Spinner)findViewById(R.id.spinner2)).setOnItemSelectedListener(this);
 
-        //按钮点击事件
+        ((Spinner)findViewById(R.id.spinner)).setSelection(2);//默认选择探索-突破循环
+        function = FunctionConstant.TANSUO_JJTP;
+    }
 
-        //服务启动
-        start.setOnClickListener(v->{
+    @Override
+    public void onClick(View view) {
 
-            if(tpjnum.getText().toString().matches("\\d+")
-                && victorynum.getText().toString().matches("\\d+")
-                &&failnum.getText().toString().matches("\\d+")){
+        switch (view.getId()){
+            case R.id.start:{
+                if(tpjnum.getText().toString().matches("\\d+")
+                        && victorynum.getText().toString().matches("\\d+")
+                        &&failnum.getText().toString().matches("\\d+")){
 
-                intent.putExtra("tpjnum",Integer.parseInt(tpjnum.getText().toString()));
-                intent.putExtra("victorynum",Integer.parseInt(victorynum.getText().toString()));
-                intent.putExtra("failnum",Integer.parseInt(failnum.getText().toString()));
-                intent.putExtra("onlyTansuo",onlyTansuoRadio.isChecked());
-                intent.putExtra("onlyJjtp",onlyJjtpRadio.isChecked());
-                intent.putExtra("bothRadio",bothRadio.isChecked());
+                    view.setEnabled(false);
+                    intent.putExtra("tpjnum",Integer.parseInt(tpjnum.getText().toString()));
+                    intent.putExtra("victorynum",Integer.parseInt(victorynum.getText().toString()));
+                    intent.putExtra("failnum",Integer.parseInt(failnum.getText().toString()));
+                    intent.putExtra("function",function);
+                    startService(intent);
+                }else{
+                    Toast.makeText(this,"请输入正整数！",Toast.LENGTH_SHORT).show();
+
+                }
+            }
+            break;
+
+            case R.id.stop:{
+                findViewById(R.id.start).setEnabled(true);
+                stopService(intent);
+                Intent intent2 = new Intent(this, TestService.class);
+                stopService(intent2);
+            }
+            break;
+            case R.id.test:{
+
+
+
+               // Mat target = Imgcodecs.imread("/mnt/shared/Pictures/yys/"+ "tpj0" +".png");
+                //Imgproc.threshold(target,target,100,255,Imgproc.THRESH_BINARY);
+
+               // Imgproc.findContours(target,Imgproc.drawContours(),);
+                Intent intent = new Intent(this,TestService.class);
+                intent.putExtra("testTxt",testTxt.getText().toString());
                 startService(intent);
-            }else{
-                Toast.makeText(this,"请输入正整数！",Toast.LENGTH_SHORT).show();
+
+                //ImgUtils.swipe(401,659,600,659,200);
+//                ImgUtils.getScreen();
+//                MatchResult img = ImgUtils.findImg("baigui/test");
+//                if(img.getSimilarity()>0.9){
+//                    Toast.makeText(this,img.getX() +","+ img.getY(),Toast.LENGTH_SHORT).show();
+//
+//                }
+//                //401,659
+//                ImgUtils.tap(img.getX(),img.getY());
+
 
             }
-
-        });
-
-        //服务停止
-        stop.setOnClickListener(v->{
-
-            stopService(intent);
-
-            Intent intent2 = new Intent(this, TestService.class);
-            stopService(intent2);
-        });
-
-        //测试
-        test.setOnClickListener(v->{
-
-            new Thread(()->{
-                if(null != myService ){
-                    Log.d("test","1" + myService.getStartThread());
-                    //state.setText("运行中");
-                }else {
-                    Log.d("test","2");
-                    //state.setText("停止");
-                }
-            }).start();
-
-//            intent.putExtra("testTxt",testTxt.getText().toString());
-//            startService(intent);
-
-        });
-
-        //跳转页面
-        jump.setOnClickListener(v->{
-            Intent intent2 = new Intent(this,MainActivity2.class);
-            startActivity(intent2);
-        });
-
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        Log.d("test","onSaveInstanceState");
-        super.onSaveInstanceState(outState);
-
-    }
-
-    @Override
-    protected void onStart() {
-        Log.d("test","MainActivity start");
-
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d("test","MainActivity stop");
-        //unregisterReceiver(msgReceiver);
-        super.onStop();
-    }
-
-    ServiceConnection conn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            //返回一个绑定服务的实例，可直接调用其公开的方法
-            myService = ((MyService.Mybinder) iBinder).getService();
-            //注册回调接口(可接收service进度的变化)
-            myService.setOnProgressListener(new OnProgressListener() {
-                @Override
-                public void onProgress(int progress) {
-                    Log.d("test", "设置进度"+ progress);
-                    //无法更改ui
-                    //String str = "设置进度"+ progress;
-                    //Toast.makeText(MainActivity.this,str,Toast.LENGTH_SHORT).show();
-                    //progressBar.setProgress(progress);
-                }
-            });
+            break;
+            case R.id.jump:{
+                Intent intent2 = new Intent(this,MainActivity2.class);
+                startActivity(intent2);
+            }
+            break;
 
         }
 
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
+    }
 
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        if(spinnerFlag[0] < 2){//初始化每个spinner会监听一次，需要跳过
+            spinnerFlag[0] = spinnerFlag[0] +1;
+            return;
         }
-    };
+        switch (adapterView.getId()){
+            case R.id.spinner:{
+                String[] arr = getResources().getStringArray(R.array.function);
+                function = arr[i];
+                funcTv.setText(function);
+            }break;
+            case R.id.spinner2:{
+                String[] arr = getResources().getStringArray(R.array.function2);
+                function = arr[i];
+                funcTv.setText(function);
+            }break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+        Toast.makeText(MainActivity.this, "/??", Toast.LENGTH_SHORT).show();
+    }
 
 
     /**
@@ -230,6 +234,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        Log.d("test","onSaveInstanceState");
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d("test","MainActivity start");
+
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d("test","MainActivity stop");
+        //unregisterReceiver(msgReceiver);
+        super.onStop();
+    }
 
     @Override
     protected void onDestroy() {

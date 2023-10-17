@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:columnCount="4"
-    android:background="#DDD6D6"
+
     >
 
     <TextView
@@ -26,12 +26,18 @@
             android:id="@+id/tv1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="功能：探索/突破 ---- "/>
+            android:text="功能："/>
+        <TextView
+            android:id="@+id/funcTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="探索/突破"/>
 
         <TextView
             android:id="@+id/tv2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
             android:text="状态："/>
 
         <TextView
@@ -49,37 +55,67 @@
         android:layout_columnSpan="4"
         android:orientation="horizontal">
 
-        <RadioGroup
-            android:id="@+id/radioGroup"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_height="wrap_content"
+            android:text="基础"/>
+        <com.example.myapplication.widget.MySpinner
+            android:id="@+id/spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <RadioButton
-                android:id="@+id/radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="突破">
+            android:layout_marginTop="10dp"
+            android:entries="@array/function"
+            />
 
-            </RadioButton>
-
-            <RadioButton
-                android:id="@+id/radio2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="探索">
-            </RadioButton>
-
-            <RadioButton
-                android:id="@+id/radio3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="探索/突破">
-            </RadioButton>
-
-        </RadioGroup>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_height="wrap_content"
+            android:text="进阶"/>
+        <com.example.myapplication.widget.MySpinner
+            android:id="@+id/spinner2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:entries="@array/function2"
+            />
 
 
     </LinearLayout>
+
+
+<!--        <RadioGroup-->
+<!--            android:id="@+id/radioGroup"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal">-->
+<!--            <RadioButton-->
+<!--                android:id="@+id/radio"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="突破">-->
+
+<!--            </RadioButton>-->
+
+<!--            <RadioButton-->
+<!--                android:id="@+id/radio2"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="探索">-->
+<!--            </RadioButton>-->
+
+<!--            <RadioButton-->
+<!--                android:id="@+id/radio3"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="探索/突破">-->
+<!--            </RadioButton>-->
+
+<!--        </RadioGroup>-->
+
+
+
 
     <LinearLayout
         android:layout_width="match_parent"

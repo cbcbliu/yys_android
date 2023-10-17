@@ -20,7 +20,7 @@ public class TestService extends Service {
 
     Thread t;
 
-    Boolean startThread = false;
+    final int[] startFlag = {0};
 
     String Tag = "Test服务";
 
@@ -34,7 +34,7 @@ public class TestService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        if(startThread){
+        if(startFlag[0] == 1){
             Log.d(Tag, "重复启动服务！");
             return super.onStartCommand(intent, flags, startId);
         }else {
@@ -43,23 +43,27 @@ public class TestService extends Service {
         String testTxt = intent.getStringExtra("testTxt");
 
         t = new Thread(()->{
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
 
-            while(startThread){
+            while(startFlag[0] == 1){
 
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
                 ImgUtils.getScreen();
                 MatchResult img = ImgUtils.findImg(testTxt);
                 //ImgUtils.tap(img.getX(),img.getY()-100);
-
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                }
 
         });
         t.start();
-        startThread = true;
+        startFlag[0] = 1;
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -68,7 +72,7 @@ public class TestService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d(Tag, "服务销毁！");
-        startThread = false;
+        startFlag[0] = 0;
     }
 
 

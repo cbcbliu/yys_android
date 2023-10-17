@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="function">
+        <item>突破</item>
+        <item>探索</item>
+        <item>探索/突破</item>
+    </string-array>
+
+    <string-array name="function2">
+        <item>百鬼夜行</item>
+        <item>业原火</item>
+        <item>魂土</item>
+    </string-array>
+    
+</resources>

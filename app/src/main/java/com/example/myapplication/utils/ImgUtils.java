@@ -48,8 +48,8 @@ public class ImgUtils {
 //        }
         long start = System.currentTimeMillis();
         Mat screencap = Imgcodecs.imread("/storage/emulated/0/yys/screenshot.png");
-        Mat target = Imgcodecs.imread("/storage/emulated/0/yys/"+ findimg +".png");
-
+        //Mat target = Imgcodecs.imread("/storage/emulated/0/yys/"+ findimg +".png");
+        Mat target = Imgcodecs.imread("/mnt/shared/Pictures/yys/"+ findimg +".png");
         Mat outputImg = new Mat(screencap.rows(),screencap.cols(),screencap.type());
         Imgproc.matchTemplate(target,screencap,outputImg,Imgproc.TM_CCOEFF_NORMED);
         Core.MinMaxLocResult res =  Core.minMaxLoc(outputImg);
@@ -85,6 +85,22 @@ public class ImgUtils {
             //Log.e(e.getMessage());
         }
         Log.d("点击", "点击："+x+","+y);
+    }
+
+    public static void swipe(int x ,int y,int x2 ,int y2,int duration){
+        try{
+            Process sh = Runtime.getRuntime().exec("su");
+            DataOutputStream os = new DataOutputStream(sh.getOutputStream());
+            os.writeBytes("input swipe "+x+" "+y + " "+x2+" "+y2+" "+duration);
+            os.flush();
+            os.close();
+            sh.waitFor();
+            sh.destroy();
+        }catch (Exception e){
+            //Log.e(e.getMessage());
+        }
+        Log.d("滑动", "历经"+duration+"ms从"+x+","+y+"滑动到"+x2+","+y2);
+
     }
 
     //需要log出所点击名字
