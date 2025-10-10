@@ -193,22 +193,33 @@ public class FunctionExecutor {
         int exceptionTime = 0;//异常次数
         String function = config.getString("function");
         boolean flag = false;//结束标识
-        MatchResult baox2,exit,zlp,shengli,kun28,tansuo,boss,normal,reject,tsExit,tpj,yb;
+        MatchResult baox2,exit,zlp,shengli,kun28,tansuo,boss,normal,reject,tsExit,tpj,yb,jjexit,jjpanel;
         boolean isLoop = function.equals(FunctionConstant.TANSUO_JJTP);
+        if(isLoop && tpjnum >= 10){
+            jjtp();
+        }
         while (startFlag[0] == 1){
 
             Thread.sleep(1000);
             logToScreen("探索困28中...突破卷:"+tpjnum + ",探索次数:"+time + (isLoop? (",突破次数:"+jjtpTime) : ""));
             //LogUtils.saveLog(service,"探索中...突破卷:"+tpjnum + ",探索次数:"+time+ ",突破次数:"+jjtpTime);
-
+            ImgUtils.getScreen();
             //----------------【异常区】--------------------
             reject = ImgUtils.findImg("reject");//悬赏拒绝
             shengli = ImgUtils.findImg("shengli");//开宝箱之后
+            jjpanel = ImgUtils.findImg("jjpanel");//处于结界突破面板
+
             if (reject.isExist()) {
                 reject.tap();
             }
             if (shengli.isExist()) {
                 shengli.tap();
+            }
+            if(jjpanel.isExist()){
+                jjexit = ImgUtils.findImg("jjexit");
+                if (jjexit.isExist()) {
+                    jjexit.tap();
+                }
             }
             if(exceptionTime >= 10){//累计十次退出探索重进避免死循环
                 tsExit = ImgUtils.findImg("tansuo/exit");
@@ -221,7 +232,7 @@ public class FunctionExecutor {
             }
             //----------------【异常区】--------------------
 
-            ImgUtils.getScreen();
+
             boss = ImgUtils.findImg("boss");
             normal = ImgUtils.findImg("normal");
 
@@ -249,11 +260,12 @@ public class FunctionExecutor {
                     }
 
                     if(shengli.isExist()){
-                        Thread.sleep(500);//结算界面战利品弹出来需要时间
+                        Thread.sleep(800);//结算界面战利品弹出来需要时间
                         ImgUtils.getScreen();
                         tpj = ImgUtils.findImg("tpj");
                         if(tpj.isExist()){
                             tpjnum++;
+                            logToScreen("掉落突破卷！");
                             if(tpjnum >= 10 && !function.equals(FunctionConstant.TANSUO)){
                                 //当脚本功能为探索突破循环时，需要退出
                                 logToScreen( "突破卷数量已足够，准备结束探索" );
@@ -313,6 +325,7 @@ public class FunctionExecutor {
                 if(flag){
                     logToScreen("探索结束" );
                     jjtp();
+                    flag = false;
                 }
                 kun28.tap("kun28");
                 exceptionTime = 0;
@@ -332,6 +345,7 @@ public class FunctionExecutor {
                         exit.tap("exit");
                         logToScreen("探索结束" );
                         jjtp();
+                        flag = false;
                     }
                 }
                 tansuo.tap("tansuo");
